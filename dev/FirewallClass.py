@@ -6,6 +6,9 @@ class Firewall:
         self.firewallRules = {} # dictionary maintaining a mapping of port and its corresponding address information for a (direction, protocol) tuple
         self.allowedProtocols = ["tcp","udp"]
         self.allowedDirections = ["inbound", "outbound"]
+        for direction in self.allowedDirections:
+            for protocol in self.allowedProtocols:
+                self.firewallRules[(direction,protocol)] = {}
         with open(inputRulesFilePath,'r') as file:
             for rule in file:
                 (direction, protocol, portString, ipAddressString) = rule.strip().split(',')
@@ -13,12 +16,11 @@ class Firewall:
     
     # function to add a rule present in the file
     def addRule(self, direction, protocol, portString, ipAddressString):
-        self.firewallRules[(direction,protocol)] = {}
         portObject = port(portString) # port class object
         ipAddressObject = ipAddress(ipAddressString) # ipAddress class object
         ipAddressRange = ipAddressObject.ipAddressRange()
         for portNumber in portObject.portValues():
-            if portNumber not in self.firewallRules:
+            if portNumber not in self.firewallRules[(direction,protocol)]:
                 self.firewallRules[(direction,protocol)][portNumber] = [ipAddressRange]
             else:
                 self.firewallRules[(direction,protocol)][portNumber].append(ipAddressRange)
